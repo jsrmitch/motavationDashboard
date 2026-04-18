@@ -5,16 +5,22 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myapplication"
+    namespace = "com.motavation.dashboard"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.motavation.dashboard"
         minSdk = 23
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
+    }
+
+    bundle {
+        language { enableSplit = true }
+        density { enableSplit = true }
+        abi { enableSplit = true }
     }
 
     buildTypes {
