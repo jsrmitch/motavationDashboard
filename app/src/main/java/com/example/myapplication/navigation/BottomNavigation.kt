@@ -43,11 +43,13 @@ data class NavItem(
 @Composable
 fun BottomNavigationScreen() {
     val navController = rememberNavController()
-    val navItems = listOf(
-        NavItem("Home", Icons.Default.Home, "home"),
-        NavItem("Rounds", Icons.Default.SportsMartialArts, "rounds"),
-        NavItem("Competition", Icons.Default.EmojiEvents, "competition"),
-    )
+    val navItems = remember {
+        listOf(
+            NavItem("Home", Icons.Default.Home, "home"),
+            NavItem("Rounds", Icons.Default.SportsMartialArts, "rounds"),
+            NavItem("Competition", Icons.Default.EmojiEvents, "competition"),
+        )
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route

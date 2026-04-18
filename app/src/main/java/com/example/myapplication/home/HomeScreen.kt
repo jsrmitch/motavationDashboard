@@ -85,11 +85,16 @@ fun HomeScreen() {
 }
 
 @Composable
-fun rememberCurrentTime(refreshMs: Long = 1_000): State<LocalDateTime> {
-    return produceState(initialValue = LocalDateTime.now(), refreshMs) {
+fun rememberCurrentTime(): State<LocalDateTime> {
+    return produceState(initialValue = LocalDateTime.now()) {
         while (isActive) {
-            delay(refreshMs)
-            value = LocalDateTime.now()
+            val now = LocalDateTime.now()
+            value = now
+            // Sleep until the start of the next wall-clock second so the
+            // displayed time stays in sync and we don't drift into showing
+            // the same HH:mm:ss twice (or skipping a second).
+            val msToNextSecond = 1_000L - (now.nano / 1_000_000L) % 1_000L
+            delay(msToNextSecond)
         }
     }
 }
