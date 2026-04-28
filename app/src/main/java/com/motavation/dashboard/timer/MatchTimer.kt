@@ -5,6 +5,7 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.SystemClock
 import android.speech.tts.TextToSpeech
+import com.motavation.dashboard.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,6 +21,8 @@ class MatchTimer(
     application: Application,
     private val scope: CoroutineScope
 ) {
+    private val settings = SettingsRepository.get(application)
+
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var beepTone: ToneGenerator? = null
@@ -33,7 +36,7 @@ class MatchTimer(
     /** Called every time the displayed second changes. */
     var onTick: ((secondsRemaining: Int) -> Unit)? = null
 
-    /** Whether to run round-style announcements (1-min warning, 10-sec beeps). */
+    /** Whether to run round-style announcements (1-min warning, 5-sec beeps). */
     var announceEnabled: Boolean = true
 
     init {
@@ -106,13 +109,13 @@ class MatchTimer(
             announced1Min = true
             speak("1 minute remaining.")
         }
-        if (remaining <= 10) {
+        if (remaining <= 5) {
             playBeep()
         }
     }
 
     fun speak(text: String) {
-        if (!ttsReady) return
+        if (!ttsReady || settings.isMuted) return
         tts?.speak(text, TextToSpeech.QUEUE_ADD, null, text.hashCode().toString())
     }
 
@@ -121,10 +124,12 @@ class MatchTimer(
     }
 
     fun playBeep() {
+        if (settings.isMuted) return
         beepTone?.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
     }
 
     fun playAlarm() {
+        if (settings.isMuted) return
         alarmTone?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 800)
     }
 

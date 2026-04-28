@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.motavation.dashboard.navigation.ReportScreenBusy
 import com.motavation.dashboard.ui.components.TvButton
 import com.motavation.dashboard.ui.theme.*
 
@@ -70,6 +71,11 @@ private fun formatMmSs(totalSeconds: Int): String {
 @Composable
 fun CompetitionScreen(viewModel: CompetitionViewModel = viewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Report busy whenever a match is actively timing (not IDLE/COMPLETE).
+    ReportScreenBusy(
+        state.phase != MatchPhase.IDLE && state.phase != MatchPhase.COMPLETE
+    )
 
     DisposableEffect(Unit) {
         onDispose { viewModel.resetMatch() }

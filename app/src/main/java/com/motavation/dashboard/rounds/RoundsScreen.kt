@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.motavation.dashboard.navigation.ReportScreenBusy
 import com.motavation.dashboard.ui.components.TvButton
 import com.motavation.dashboard.ui.theme.*
 
@@ -41,6 +42,20 @@ private val RestGreen = Color(0xFF4CAF50)
 @Composable
 fun RoundsScreen(viewModel: RoundsViewModel = viewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Report busy whenever a session is actively timing (not IDLE/COMPLETE).
+    ReportScreenBusy(
+        state.phase != SessionPhase.IDLE && state.phase != SessionPhase.COMPLETE
+    )
+
+    // If returning to this screen after a finished session, drop the
+    // completion screen and go back to the config so the user can start
+    // a fresh session immediately.
+    LaunchedEffect(Unit) {
+        if (state.phase == SessionPhase.COMPLETE) {
+            viewModel.stopSession()
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose {

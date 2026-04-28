@@ -107,12 +107,40 @@ class RoundsViewModel(application: Application) : AndroidViewModel(application) 
     private fun beginRest() {
         timer.announced1Min = false
         timer.announceEnabled = false
-        val dur = _state.value.restDurationSec
-        _state.update { it.copy(phase = SessionPhase.REST, secondsRemaining = dur) }
-        timer.speak("Rest.")
-        timer.start(dur) {
-            _state.update { it.copy(currentRound = it.currentRound + 1) }
-            beginCountdown()
+        val totalRest = _state.value.restDurationSec
+        // The rest timer runs for the full configured duration, but the final
+        // 5 seconds flip the phase to COUNTDOWN so the UI shows the get-ready
+        // countdown during those seconds (instead of adding 5 extra seconds
+        // after the rest ends). If rest is <= 5s, we stay in COUNTDOWN the
+        // whole time.
+        val nextRound = _state.value.currentRound + 1
+        _state.update {
+            it.copy(
+                phase = if (totalRest > 5) SessionPhase.REST else SessionPhase.COUNTDOWN,
+                secondsRemaining = totalRest,
+                currentRound = nextRound
+            )
+        }
+        if (totalRest > 5) {
+            timer.speak("Rest.")
+        } else {
+            timer.speak("Round $nextRound. Get ready.")
+        }
+        var countdownAnnounced = totalRest <= 5
+        timer.onTick = { remaining ->
+            if (!countdownAnnounced && remaining <= 5) {
+                countdownAnnounced = true
+                timer.announceEnabled = true
+                timer.speak("Round $nextRound. Get ready.")
+                _state.update { it.copy(phase = SessionPhase.COUNTDOWN, secondsRemaining = remaining) }
+            } else {
+                _state.update { it.copy(secondsRemaining = remaining) }
+            }
+        }
+        timer.start(totalRest) {
+            // Restore default onTick for subsequent phases.
+            timer.onTick = { r -> _state.update { it.copy(secondsRemaining = r) } }
+            beginRound()
         }
     }
 

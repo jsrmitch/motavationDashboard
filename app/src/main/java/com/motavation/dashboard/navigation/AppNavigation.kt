@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.motavation.dashboard.competition.CompetitionScreen
 import com.motavation.dashboard.home.HomeScreen
 import com.motavation.dashboard.rounds.RoundsScreen
+import com.motavation.dashboard.settings.SettingsScreen
 
 @Composable
 fun AppNavigation(
@@ -24,6 +25,9 @@ fun AppNavigation(
         }
         composable("competition") {
             CompetitionScreen()
+        }
+        composable("settings") {
+            SettingsScreen()
         }
     }
 }
